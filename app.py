@@ -17,9 +17,12 @@ login_manager = LoginManager()
 mail = Mail()
 csrf = CSRFProtect()
 
+# create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "dev_secret_key"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///mutual_funds.db")
+# setup a secret key, required by sessions
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
+# configure the database, relative to the app instance folder
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "sqlite:///mutual_funds.db"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
@@ -40,9 +43,13 @@ mail.init_app(app)
 csrf.init_app(app)
 
 with app.app_context():
-    import models
-    from routes import init_mock_data
+    # Make sure to import the models here or their tables won't be created
+    import models  # noqa: F401
+
     db.create_all()
+
+from routes import init_mock_data
+with app.app_context():
     init_mock_data()
 
 from routes import *
