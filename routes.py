@@ -4,9 +4,13 @@ from app import app, db, login_manager
 from models import User, MutualFund, Portfolio, Transaction, Payment
 from werkzeug.security import generate_password_hash
 from services.payment_service import PaymentService
+from services.kyc_service import KYCService
 import json
+import base64
+from werkzeug.utils import secure_filename
 
 payment_service = PaymentService()
+kyc_service = KYCService()
 
 @login_manager.user_loader
 def load_user(id):
@@ -144,6 +148,107 @@ def verify_payment():
         return jsonify({'error': 'Payment verification failed'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/kyc', methods=['GET'])
+@login_required
+def kyc():
+    kyc_record = current_user.kyc
+    return render_template('kyc.html', kyc=kyc_record)
+
+@app.route('/api/kyc/upload-pan', methods=['POST'])
+@login_required
+def upload_pan():
+    if 'pan_image' not in request.files:
+        return jsonify({'error': 'No PAN image provided'}), 400
+
+    pan_image = request.files['pan_image']
+    pan_number = request.form.get('pan_number')
+
+    if not pan_image or not pan_number:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Convert image to base64 for API
+    image_data = base64.b64encode(pan_image.read()).decode()
+
+    success, result = kyc_service.hyperverge.verify_pan(pan_number, image_data)
+    if success:
+        kyc_service.update_kyc_status(
+            current_user.kyc.id,
+            pan_number=pan_number,
+            pan_verified=True
+        )
+        return jsonify({'status': 'success', 'message': 'PAN verified successfully'})
+
+    return jsonify({'error': result}), 400
+
+@app.route('/api/kyc/upload-aadhaar', methods=['POST'])
+@login_required
+def upload_aadhaar():
+    if 'aadhaar_front' not in request.files or 'aadhaar_back' not in request.files:
+        return jsonify({'error': 'Both Aadhaar front and back images are required'}), 400
+
+    aadhaar_front = request.files['aadhaar_front']
+    aadhaar_back = request.files['aadhaar_back']
+    aadhaar_number = request.form.get('aadhaar_number')
+
+    if not aadhaar_number:
+        return jsonify({'error': 'Aadhaar number is required'}), 400
+
+    # Convert images to base64
+    front_data = base64.b64encode(aadhaar_front.read()).decode()
+    back_data = base64.b64encode(aadhaar_back.read()).decode()
+
+    success, result = kyc_service.hyperverge.verify_aadhaar(aadhaar_number, front_data, back_data)
+    if success:
+        kyc_service.update_kyc_status(
+            current_user.kyc.id,
+            aadhaar_number=aadhaar_number,
+            aadhaar_verified=True
+        )
+        return jsonify({'status': 'success', 'message': 'Aadhaar verified successfully'})
+
+    return jsonify({'error': result}), 400
+
+@app.route('/api/kyc/verify-face', methods=['POST'])
+@login_required
+def verify_face():
+    if 'selfie' not in request.files:
+        return jsonify({'error': 'Selfie image is required'}), 400
+
+    selfie = request.files['selfie']
+    id_image = request.files.get('id_image')  # Optional, can use previously uploaded ID
+
+    selfie_data = base64.b64encode(selfie.read()).decode()
+    id_data = base64.b64encode(id_image.read()).decode() if id_image else None
+
+    success, result = kyc_service.hyperverge.face_match(selfie_data, id_data)
+    if success:
+        kyc_service.update_kyc_status(
+            current_user.kyc.id,
+            face_verified=True
+        )
+        return jsonify({'status': 'success', 'message': 'Face verification successful'})
+
+    return jsonify({'error': result}), 400
+
+@app.route('/api/kyc/verify-bank', methods=['POST'])
+@login_required
+def verify_bank():
+    account_number = request.form.get('account_number')
+    ifsc_code = request.form.get('ifsc_code')
+
+    if not account_number or not ifsc_code:
+        return jsonify({'error': 'Account number and IFSC code are required'}), 400
+
+    success, result = kyc_service.hyperverge.verify_bank_account(account_number, ifsc_code)
+    if success:
+        kyc_service.update_kyc_status(
+            current_user.kyc.id,
+            bank_verified=True
+        )
+        return jsonify({'status': 'success', 'message': 'Bank account verified successfully'})
+
+    return jsonify({'error': result}), 400
 
 with app.app_context():
     init_mock_data()

@@ -11,12 +11,26 @@ class User(UserMixin, db.Model):
     portfolios = db.relationship('Portfolio', backref='user', lazy=True)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     payments = db.relationship('Payment', backref='user', lazy=True)
+    kyc = db.relationship('KYC', backref='user', uselist=False, lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class KYC(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pan_number = db.Column(db.String(10), unique=True)
+    aadhaar_number = db.Column(db.String(12), unique=True)
+    pan_verified = db.Column(db.Boolean, default=False)
+    aadhaar_verified = db.Column(db.Boolean, default=False)
+    face_verified = db.Column(db.Boolean, default=False)
+    bank_verified = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed, rejected
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class MutualFund(db.Model):
     id = db.Column(db.Integer, primary_key=True)

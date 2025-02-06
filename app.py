@@ -32,6 +32,10 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 app.config["RAZORPAY_KEY_ID"] = os.environ.get("RAZORPAY_KEY_ID", "dummy_key")
 app.config["RAZORPAY_KEY_SECRET"] = os.environ.get("RAZORPAY_KEY_SECRET", "dummy_secret")
 
+# HyperVerge Configuration
+app.config["HYPERVERGE_APP_ID"] = os.environ.get("HYPERVERGE_APP_ID", "dummy_app_id")
+app.config["HYPERVERGE_APP_KEY"] = os.environ.get("HYPERVERGE_APP_KEY", "dummy_app_key")
+
 # Mail configuration
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587

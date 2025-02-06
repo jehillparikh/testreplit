@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>KYC Verification</h2>
+        <p class="text-muted">Complete your KYC verification to start investing</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Progress Tracker -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Verification Progress</h5>
+                <div class="progress mb-3">
+                    {% set progress = 0 %}
+                    {% if kyc %}
+                        {% set progress = (
+                            (kyc.pan_verified + kyc.aadhaar_verified + 
+                             kyc.face_verified + kyc.bank_verified) * 25
+                        ) %}
+                    {% endif %}
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ progress }}%" 
+                         aria-valuenow="{{ progress }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ progress }}%
+                    </div>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        PAN Verification
+                        {% if kyc and kyc.pan_verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-lg"></i></span>
+                        {% else %}
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#panModal">
+                                Upload
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Aadhaar Verification
+                        {% if kyc and kyc.aadhaar_verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-lg"></i></span>
+                        {% else %}
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#aadhaarModal">
+                                Upload
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Face Verification
+                        {% if kyc and kyc.face_verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-lg"></i></span>
+                        {% else %}
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#faceModal">
+                                Verify
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Bank Account Verification
+                        {% if kyc and kyc.bank_verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-lg"></i></span>
+                        {% else %}
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bankModal">
+                                Verify
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Verification Status</h5>
+                <div class="alert {% if kyc and kyc.status == 'completed' %}alert-success{% else %}alert-info{% endif %}">
+                    {% if not kyc %}
+                        <p>Please complete your KYC verification to start investing.</p>
+                    {% elif kyc.status == 'completed' %}
+                        <p>Your KYC verification is complete! You can now start investing.</p>
+                    {% else %}
+                        <p>Your KYC verification is in progress. Complete all steps to start investing.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAN Upload Modal -->
+<div class="modal fade" id="panModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">PAN Card Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="panForm">
+                    <div class="mb-3">
+                        <label class="form-label">PAN Number</label>
+                        <input type="text" class="form-control" name="pan_number" required pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}">
+                        <small class="text-muted">Format: ABCDE1234F</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PAN Card Image</label>
+                        <input type="file" class="form-control" name="pan_image" accept="image/*" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitPan">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Aadhaar Upload Modal -->
+<div class="modal fade" id="aadhaarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aadhaar Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="aadhaarForm">
+                    <div class="mb-3">
+                        <label class="form-label">Aadhaar Number</label>
+                        <input type="text" class="form-control" name="aadhaar_number" required pattern="[0-9]{12}">
+                        <small class="text-muted">12-digit Aadhaar number</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Front Image</label>
+                        <input type="file" class="form-control" name="aadhaar_front" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Back Image</label>
+                        <input type="file" class="form-control" name="aadhaar_back" accept="image/*" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitAadhaar">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Face Verification Modal -->
+<div class="modal fade" id="faceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Face Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="faceForm">
+                    <div class="mb-3">
+                        <label class="form-label">Take Selfie</label>
+                        <div class="text-center mb-2">
+                            <video id="video" width="100%" style="display:none;"></video>
+                            <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+                            <img id="selfiePreview" class="img-fluid mb-2" style="display:none;">
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="startCamera">
+                            <i class="bi bi-camera"></i> Open Camera
+                        </button>
+                        <button type="button" class="btn btn-primary" id="takePhoto" style="display:none;">
+                            Take Photo
+                        </button>
+                        <button type="button" class="btn btn-danger" id="retakePhoto" style="display:none;">
+                            Retake
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitFace">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Account Verification Modal -->
+<div class="modal fade" id="bankModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bank Account Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bankForm">
+                    <div class="mb-3">
+                        <label class="form-label">Account Number</label>
+                        <input type="text" class="form-control" name="account_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">IFSC Code</label>
+                        <input type="text" class="form-control" name="ifsc_code" required pattern="[A-Z]{4}0[A-Z0-9]{6}">
+                        <small class="text-muted">Format: ABCD0123456</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitBank">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/kyc.js') }}"></script>
+{% endblock %}
