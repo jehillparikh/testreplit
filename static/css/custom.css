@@ -1,0 +1,196 @@
+/* Custom styles for Mutual Fund Platform */
+
+/* General Layout Improvements */
+body {
+    min-height: 100vh;
+    background-color: var(--bs-dark);
+}
+
+/* Card Enhancements */
+.card {
+    border: 1px solid var(--bs-gray-700);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Dashboard Stats Cards */
+#portfolioStats .list-group-item {
+    background-color: transparent;
+    border-color: var(--bs-gray-700);
+}
+
+/* Chart Container */
+#portfolioChart {
+    min-height: 300px;
+}
+
+/* Table Improvements */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    background-color: var(--bs-gray-900);
+    color: var(--bs-gray-200);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Investment Button Styling */
+.invest-btn {
+    min-width: 80px;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Navbar Customization */
+.navbar {
+    border-bottom: 1px solid var(--bs-gray-700);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand i {
+    color: var(--bs-primary);
+    margin-right: 0.5rem;
+}
+
+/* Badge Customizations */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+/* Modal Customization */
+.modal-content {
+    background-color: var(--bs-gray-900);
+    border: 1px solid var(--bs-gray-700);
+}
+
+.modal-header {
+    border-bottom-color: var(--bs-gray-700);
+}
+
+.modal-footer {
+    border-top-color: var(--bs-gray-700);
+}
+
+/* Alert Customization */
+.alert {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .table-responsive {
+        margin: 0 -1rem;
+        width: calc(100% + 2rem);
+    }
+}
+
+/* Loading State Styles */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: 3px solid var(--bs-gray-600);
+    border-top-color: var(--bs-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Toast Notification Styles */
+.toast {
+    background-color: var(--bs-gray-800);
+    border: 1px solid var(--bs-gray-700);
+}
+
+.toast-header {
+    background-color: var(--bs-gray-900);
+    border-bottom-color: var(--bs-gray-700);
+}
+
+/* Number Display Formatting */
+.currency-value {
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+/* Chart Legend Customization */
+.chart-legend {
+    padding: 1rem;
+    border-left: 1px solid var(--bs-gray-700);
+}
+
+/* Portfolio Performance Indicators */
+.performance-positive {
+    color: var(--bs-success);
+}
+
+.performance-negative {
+    color: var(--bs-danger);
+}
+
+/* Search and Filter Controls */
+.input-group-text {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+}
+
+/* Accessibility Improvements */
+:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bs-primary);
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+    }
+    
+    body {
+        background-color: white;
+    }
+}

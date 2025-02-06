@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Mutual Funds</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control" id="fundSearch" placeholder="Search funds...">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" id="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="Equity">Equity</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="Debt">Debt</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" id="riskFilter">
+            <option value="">All Risk Levels</option>
+            <option value="Low">Low Risk</option>
+            <option value="Medium">Medium Risk</option>
+            <option value="High">High Risk</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fund Name</th>
+                                <th>Ticker</th>
+                                <th>Category</th>
+                                <th>NAV</th>
+                                <th>Expense Ratio</th>
+                                <th>Risk Level</th>
+                                <th>Min Investment</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fund in funds %}
+                            <tr>
+                                <td>{{ fund.name }}</td>
+                                <td>{{ fund.ticker }}</td>
+                                <td>{{ fund.category }}</td>
+                                <td>₹{{ "%.2f"|format(fund.nav) }}</td>
+                                <td>{{ "%.2f"|format(fund.expense_ratio) }}%</td>
+                                <td>{{ fund.risk_level }}</td>
+                                <td>₹{{ "%.2f"|format(fund.min_investment) }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary invest-btn" data-fund-id="{{ fund.id }}">
+                                        Invest
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Investment Modal -->
+<div class="modal fade" id="investModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invest in Fund</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="investForm">
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₹)</label>
+                        <input type="number" class="form-control" id="investAmount" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmInvest">Invest</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/funds.js') }}"></script>
+{% endblock %}
