@@ -17,6 +17,17 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 def init_mock_data():
+    # Create test admin user if not exists
+    if User.query.filter_by(email='admin@test.com').first() is None:
+        admin_user = User(
+            username='admin',
+            email='admin@test.com'
+        )
+        admin_user.set_password('dummy')
+        db.session.add(admin_user)
+        db.session.commit()
+
+    # Initialize mock funds if not exists
     if MutualFund.query.first() is None:
         mock_funds = [
             {'name': 'Growth Fund', 'ticker': 'GRWTH', 'category': 'Equity', 'nav': 25.75, 'expense_ratio': 1.2, 'risk_level': 'High', 'min_investment': 5000},
