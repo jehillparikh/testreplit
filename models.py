@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     portfolios = db.relationship('Portfolio', backref='user', lazy=True)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
+    payments = db.relationship('Payment', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -44,3 +45,16 @@ class Transaction(db.Model):
     nav = db.Column(db.Float, nullable=False)
     amount = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    payment_id = db.Column(db.Integer, db.ForeignKey('payment.id'), nullable=True)
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(3), nullable=False, default='INR')
+    razorpay_order_id = db.Column(db.String(200), unique=True)
+    razorpay_payment_id = db.Column(db.String(200), unique=True)
+    razorpay_signature = db.Column(db.String(500))
+    status = db.Column(db.String(20), nullable=False, default='pending')  # pending, completed, failed
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)

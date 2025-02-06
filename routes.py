@@ -1,9 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, db, login_manager
-from models import User, MutualFund, Portfolio, Transaction
+from models import User, MutualFund, Portfolio, Transaction, Payment
 from werkzeug.security import generate_password_hash
+from services.payment_service import PaymentService
 import json
+
+payment_service = PaymentService()
 
 @login_manager.user_loader
 def load_user(id):
@@ -95,6 +98,52 @@ def portfolio_data():
             'purchase_value': portfolio.units * portfolio.purchase_nav
         })
     return jsonify(data)
+
+@app.route('/api/create-payment', methods=['POST'])
+@login_required
+def create_payment():
+    data = request.get_json()
+    fund_id = data.get('fund_id')
+    amount = float(data.get('amount'))
+
+    fund = MutualFund.query.get(fund_id)
+    if not fund:
+        return jsonify({'error': 'Invalid fund'}), 400
+
+    if amount < fund.min_investment:
+        return jsonify({'error': f'Minimum investment amount is ₹{fund.min_investment}'}), 400
+
+    try:
+        payment = payment_service.create_order(current_user.id, amount)
+        return jsonify({
+            'id': payment.id,
+            'order_id': payment.razorpay_order_id,
+            'amount': payment.amount,
+            'key': app.config.get('RAZORPAY_KEY_ID', 'dummy_key')
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/verify-payment', methods=['POST'])
+@login_required
+def verify_payment():
+    data = request.get_json()
+    payment_id = data.get('payment_id')
+    razorpay_payment_id = data.get('razorpay_payment_id')
+    razorpay_signature = data.get('razorpay_signature')
+    fund_id = data.get('fund_id')
+
+    try:
+        if payment_service.verify_payment(payment_id, razorpay_payment_id, razorpay_signature):
+            payment = Payment.query.get(payment_id)
+            transaction = payment_service.process_investment(payment, fund_id)
+            return jsonify({
+                'status': 'success',
+                'transaction_id': transaction.id
+            })
+        return jsonify({'error': 'Payment verification failed'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 with app.app_context():
     init_mock_data()

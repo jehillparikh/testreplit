@@ -28,6 +28,10 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+# RazorPay Configuration
+app.config["RAZORPAY_KEY_ID"] = os.environ.get("RAZORPAY_KEY_ID", "dummy_key")
+app.config["RAZORPAY_KEY_SECRET"] = os.environ.get("RAZORPAY_KEY_SECRET", "dummy_secret")
+
 # Mail configuration
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
