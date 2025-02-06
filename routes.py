@@ -58,10 +58,10 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        # Step 1: Basic user registration
         existing_user = User.query.filter_by(email=request.form['email']).first()
         if existing_user:
-            flash('Email already registered')
-            return redirect(url_for('register'))
+            return jsonify({'error': 'Email already registered'}), 400
 
         user = User(
             username=request.form['username'],
@@ -70,8 +70,13 @@ def register():
         user.set_password(request.form['password'])
         db.session.add(user)
         db.session.commit()
+
+        # Initialize KYC record
+        kyc = kyc_service.start_kyc(user.id)
+
         login_user(user)
-        return redirect(url_for('dashboard'))
+        return jsonify({'status': 'success', 'user_id': user.id})
+
     return render_template('register.html')
 
 @app.route('/logout')

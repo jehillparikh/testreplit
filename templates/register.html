@@ -2,28 +2,140 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-body">
-                <h2 class="card-title text-center mb-4">Register</h2>
-                <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </div>
-                </form>
+                <h2 class="card-title text-center mb-4">Registration & KYC</h2>
+
+                <!-- Progress Bar -->
+                <div class="progress mb-4">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" 
+                         id="registrationProgress" aria-valuenow="0" aria-valuemin="0" 
+                         aria-valuemax="100">0%</div>
+                </div>
+
+                <!-- Step 1: Basic Information -->
+                <div id="step1" class="registration-step">
+                    <h4 class="mb-3">Step 1: Basic Information</h4>
+                    <form id="basicInfoForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary next-step">Continue to KYC</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 2: PAN Verification -->
+                <div id="step2" class="registration-step" style="display: none;">
+                    <h4 class="mb-3">Step 2: PAN Card Verification</h4>
+                    <form id="panForm">
+                        <div class="mb-3">
+                            <label class="form-label">PAN Number</label>
+                            <input type="text" class="form-control" name="pan_number" required 
+                                   pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}">
+                            <small class="text-muted">Format: ABCDE1234F</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">PAN Card Image</label>
+                            <input type="file" class="form-control" name="pan_image" accept="image/*" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary prev-step">Back</button>
+                            <button type="button" class="btn btn-primary next-step">Continue</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 3: Aadhaar Verification -->
+                <div id="step3" class="registration-step" style="display: none;">
+                    <h4 class="mb-3">Step 3: Aadhaar Verification</h4>
+                    <form id="aadhaarForm">
+                        <div class="mb-3">
+                            <label class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control" name="aadhaar_number" required 
+                                   pattern="[0-9]{12}">
+                            <small class="text-muted">12-digit Aadhaar number</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Front Image</label>
+                            <input type="file" class="form-control" name="aadhaar_front" 
+                                   accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Back Image</label>
+                            <input type="file" class="form-control" name="aadhaar_back" 
+                                   accept="image/*" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary prev-step">Back</button>
+                            <button type="button" class="btn btn-primary next-step">Continue</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 4: Face Verification -->
+                <div id="step4" class="registration-step" style="display: none;">
+                    <h4 class="mb-3">Step 4: Face Verification</h4>
+                    <form id="faceForm">
+                        <div class="mb-3">
+                            <label class="form-label">Take Selfie</label>
+                            <div class="text-center mb-2">
+                                <video id="video" width="100%" style="display:none;"></video>
+                                <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+                                <img id="selfiePreview" class="img-fluid mb-2" style="display:none;">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary" id="startCamera">
+                                    <i class="bi bi-camera"></i> Open Camera
+                                </button>
+                                <button type="button" class="btn btn-primary" id="takePhoto" 
+                                        style="display:none;">Take Photo</button>
+                                <button type="button" class="btn btn-danger" id="retakePhoto" 
+                                        style="display:none;">Retake</button>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="button" class="btn btn-secondary prev-step">Back</button>
+                            <button type="button" class="btn btn-primary next-step">Continue</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 5: Bank Account Verification -->
+                <div id="step5" class="registration-step" style="display: none;">
+                    <h4 class="mb-3">Step 5: Bank Account Verification</h4>
+                    <form id="bankForm">
+                        <div class="mb-3">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" class="form-control" name="account_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IFSC Code</label>
+                            <input type="text" class="form-control" name="ifsc_code" required 
+                                   pattern="[A-Z]{4}0[A-Z0-9]{6}">
+                            <small class="text-muted">Format: ABCD0123456</small>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary prev-step">Back</button>
+                            <button type="button" class="btn btn-primary" id="completeRegistration">
+                                Complete Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <p class="text-center mt-3">
                     Already have an account? <a href="{{ url_for('login') }}">Login here</a>
                 </p>
@@ -31,4 +143,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
 {% endblock %}
