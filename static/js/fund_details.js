@@ -133,15 +133,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = parseFloat(document.getElementById('sipAmount').value);
         const period = parseInt(document.getElementById('sipPeriod').value);
         const rate = parseFloat(document.getElementById('sipReturn').value);
-        
+
         const monthlyRate = rate / (12 * 100);
         const months = period * 12;
         const invested = amount * months;
-        
+
         // Calculate future value using SIP formula
         const futureValue = amount * (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate * (1 + monthlyRate);
         const returns = futureValue - invested;
-        
+
         document.getElementById('sipResults').innerHTML = `
             <div class="mb-2">
                 <strong>Total Investment:</strong> ₹${invested.toFixed(2)}
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(`Minimum investment amount is ₹${minInvestment}`);
             return;
         }
-        
+
         try {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
@@ -177,13 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     amount: amount
                 })
             });
-            
+
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-            
+
             const options = {
                 key: data.key,
                 amount: data.amount * 100,
@@ -205,23 +205,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                 fund_id: fundId
                             })
                         });
-                        
+
                         const verifyData = await verifyResponse.json();
                         if (verifyData.error) {
                             alert(verifyData.error);
                             return;
                         }
-                        
+
                         window.location.reload();
                     } catch (error) {
                         alert('Error processing payment verification');
                     }
                 }
             };
-            
+
             const rzp = new Razorpay(options);
             rzp.open();
-            
+
         } catch (error) {
             alert('Error creating payment order');
         }
@@ -231,12 +231,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('confirmSell').addEventListener('click', async function() {
         const units = parseFloat(document.getElementById('sellUnits').value);
         const availableUnits = parseFloat(document.getElementById('availableUnits').textContent);
-        
+
         if (!units || units <= 0 || units > availableUnits) {
             alert('Please enter a valid number of units to sell');
             return;
         }
-        
+
         try {
             const response = await fetch('/api/sell-units', {
                 method: 'POST',
@@ -248,13 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     units: units
                 })
             });
-            
+
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-            
+
             window.location.reload();
         } catch (error) {
             alert('Error processing sale');
@@ -265,12 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('confirmSIP').addEventListener('click', async function() {
         const amount = parseFloat(document.getElementById('monthlySIP').value);
         const sipDate = document.getElementById('sipDate').value;
-        
+
         if (!amount || amount < minSIPAmount) {
             alert(`Minimum SIP amount is ₹${minSIPAmount}`);
             return;
         }
-        
+
         try {
             const response = await fetch('/api/create-sip', {
                 method: 'POST',
@@ -283,13 +283,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     sip_date: sipDate
                 })
             });
-            
+
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-            
+
             alert('SIP has been set up successfully!');
             window.location.reload();
         } catch (error) {
@@ -299,4 +299,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize with 1Y data
     updatePerformanceData('1Y');
+
+    // Add smooth tab switching animation
+    document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                if (pane.classList.contains('show')) {
+                    pane.classList.add('fade-exit');
+                    setTimeout(() => {
+                        pane.classList.remove('show', 'active', 'fade-exit');
+                    }, 300);
+                }
+            });
+
+            // Add active class to clicked tab with animation
+            setTimeout(() => {
+                const targetPane = document.querySelector(targetId);
+                targetPane.classList.add('fade-enter');
+                targetPane.classList.add('show', 'active');
+
+                setTimeout(() => {
+                    targetPane.classList.remove('fade-enter');
+                }, 10);
+            }, 300);
+
+            // Update nav-link active states
+            document.querySelectorAll('.nav-link').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
 });
