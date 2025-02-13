@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize performance chart
+    // Initialize performance chart with fixed height
     const ctx = document.getElementById('performanceChart').getContext('2d');
     let performanceChart = new Chart(ctx, {
         type: 'line',
@@ -40,6 +40,56 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Initialize sector allocation chart
+    const sectorCtx = document.getElementById('sectorChart').getContext('2d');
+    const sectorData = JSON.parse(document.getElementById('sectorChart').dataset.sectors || '{}');
+
+    new Chart(sectorCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(sectorData),
+            datasets: [{
+                data: Object.values(sectorData),
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#e74a3b',
+                    '#858796'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Populate sector allocation table
+    const sectorTable = document.getElementById('sectorTable');
+    if (sectorTable) {
+        sectorTable.innerHTML = Object.entries(sectorData)
+            .map(([sector, allocation]) => `
+                <tr>
+                    <td>${sector}</td>
+                    <td>${allocation}%</td>
+                </tr>
+            `).join('');
+    }
 
     // Period selector for performance chart
     document.querySelectorAll('[data-period]').forEach(button => {
@@ -115,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(`Minimum investment amount is ₹${minInvestment}`);
             return;
         }
-
+        
         try {
             const response = await fetch('/api/create-payment', {
                 method: 'POST',
@@ -127,13 +177,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     amount: amount
                 })
             });
-
+            
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-
+            
             const options = {
                 key: data.key,
                 amount: data.amount * 100,
@@ -155,20 +205,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                 fund_id: fundId
                             })
                         });
-
+                        
                         const verifyData = await verifyResponse.json();
                         if (verifyData.error) {
                             alert(verifyData.error);
                             return;
                         }
-
+                        
                         window.location.reload();
                     } catch (error) {
                         alert('Error processing payment verification');
                     }
                 }
             };
-
+            
             const rzp = new Razorpay(options);
             rzp.open();
             
@@ -181,12 +231,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('confirmSell').addEventListener('click', async function() {
         const units = parseFloat(document.getElementById('sellUnits').value);
         const availableUnits = parseFloat(document.getElementById('availableUnits').textContent);
-
+        
         if (!units || units <= 0 || units > availableUnits) {
             alert('Please enter a valid number of units to sell');
             return;
         }
-
+        
         try {
             const response = await fetch('/api/sell-units', {
                 method: 'POST',
@@ -198,13 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     units: units
                 })
             });
-
+            
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-
+            
             window.location.reload();
         } catch (error) {
             alert('Error processing sale');
@@ -215,12 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('confirmSIP').addEventListener('click', async function() {
         const amount = parseFloat(document.getElementById('monthlySIP').value);
         const sipDate = document.getElementById('sipDate').value;
-
+        
         if (!amount || amount < minSIPAmount) {
             alert(`Minimum SIP amount is ₹${minSIPAmount}`);
             return;
         }
-
+        
         try {
             const response = await fetch('/api/create-sip', {
                 method: 'POST',
@@ -233,13 +283,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     sip_date: sipDate
                 })
             });
-
+            
             const data = await response.json();
             if (data.error) {
                 alert(data.error);
                 return;
             }
-
+            
             alert('SIP has been set up successfully!');
             window.location.reload();
         } catch (error) {

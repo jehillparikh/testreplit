@@ -32,7 +32,9 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-period="5Y">5Y</button>
                         </div>
                     </div>
-                    <canvas id="performanceChart" height="300"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -113,11 +115,13 @@
                             </div>
                         </div>
 
-                        <!-- Add Sector Allocation Tab -->
+                        <!-- Sector Allocation Tab -->
                         <div class="tab-pane fade" id="sector">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <canvas id="sectorChart" height="300"></canvas>
+                                    <div style="height: 300px;">
+                                        <canvas id="sectorChart" data-sectors='{{ fund.sector_allocation|tojson }}'></canvas>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="table-responsive">
@@ -215,94 +219,16 @@
     </div>
 </div>
 
-<!-- Buy Modal -->
-<div class="modal fade" id="buyModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Buy Fund Units</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="buyForm">
-                    <div class="mb-3">
-                        <label class="form-label">Amount (₹)</label>
-                        <input type="number" class="form-control" id="buyAmount" required min="{{ fund.min_investment }}">
-                        <small class="text-muted">Minimum investment: ₹{{ fund.min_investment }}</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmBuy">Proceed to Pay</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sell Modal -->
-<div class="modal fade" id="sellModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Sell Fund Units</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="sellForm">
-                    <div class="mb-3">
-                        <label class="form-label">Units to Sell</label>
-                        <input type="number" class="form-control" id="sellUnits" required step="0.001">
-                        <small class="text-muted">Available units: <span id="availableUnits">{{ portfolio.units|default('0.000') }}</span></small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmSell">Confirm Sale</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- SIP Modal -->
-<div class="modal fade" id="sipModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Start SIP</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="sipForm">
-                    <div class="mb-3">
-                        <label class="form-label">Monthly Investment (₹)</label>
-                        <input type="number" class="form-control" id="monthlySIP" required min="{{ fund.min_sip|default(1000) }}">
-                        <small class="text-muted">Minimum SIP: ₹{{ fund.min_sip|default(1000) }}</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">SIP Date</label>
-                        <select class="form-select" id="sipDate">
-                            <option value="1">1st</option>
-                            <option value="5">5th</option>
-                            <option value="10">10th</option>
-                            <option value="15">15th</option>
-                            <option value="20">20th</option>
-                            <option value="25">25th</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmSIP">Start SIP</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+<!-- Add script to set fundId -->
+<script>
+    const fundId = {{ fund.id }};
+    const fundName = "{{ fund.name }}";
+    const minInvestment = {{ fund.min_investment }};
+    const minSIPAmount = {{ fund.min_sip|default(1000) }};
+</script>
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('static', filename='js/fund_details.js') }}"></script>
+{% endblock %}
 {% endblock %}
