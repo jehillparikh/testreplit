@@ -30,7 +30,7 @@
                             <span>5Y Return</span>
                             <span class="text-success">82.6%</span>
                         </div>
-                        <a href="#" class="btn btn-outline-primary btn-sm">View Funds</a>
+                        <a href="{{ url_for('funds') }}?category={{ category|urlencode }}" class="btn btn-outline-primary btn-sm">View Funds</a>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,11 @@
                         <tbody>
                             {% for fund in funds %}
                             <tr>
-                                <td>{{ fund.name }}</td>
+                                <td>
+                                    <a href="{{ url_for('fund_details', fund_id=fund.id) }}" class="text-decoration-none">
+                                        {{ fund.name }}
+                                    </a>
+                                </td>
                                 <td>{{ fund.category }}</td>
                                 <td class="text-success">{{ "%.2f"|format(fund.returns_1y|default(0)) }}%</td>
                                 <td class="text-success">{{ "%.2f"|format(fund.returns_3y|default(0)) }}%</td>
@@ -152,7 +156,7 @@
                                 <td>₹{{ "%.2f"|format(fund.min_investment) }}</td>
                                 <td>
                                     <a href="{{ url_for('fund_details', fund_id=fund.id) }}" 
-                                       class="btn btn-sm btn-primary">View</a>
+                                       class="btn btn-sm btn-primary">View Details</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -163,6 +167,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
