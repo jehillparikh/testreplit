@@ -39,29 +39,48 @@
     </div>
 </div>
 
-<!-- Recommended Funds -->
+<!-- Recommended Funds Section -->
 <div class="row mb-4">
     <div class="col-12">
         <h4>Recommended Funds</h4>
-        <div class="row g-3">
-            {% for fund in recommended_funds %}
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ fund.name }}</h5>
-                        <p class="card-text text-muted">{{ fund.category }}</p>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>1Y Return</span>
-                            <span class="text-success">{{ "%.1f"|format(fund.returns_1y) }}%</span>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted">Min Investment: ₹{{ "%.2f"|format(fund.min_investment) }}</small>
-                        </div>
-                        <a href="{{ url_for('fund_details', fund_id=fund.id) }}" class="btn btn-primary btn-sm">View Details</a>
-                    </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fund Name</th>
+                                <th>Category</th>
+                                <th>1Y Return</th>
+                                <th>3Y Return</th>
+                                <th>5Y Return</th>
+                                <th>Expense Ratio</th>
+                                <th>Fund House</th>
+                                <th>Fund Manager</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fund in recommended_funds %}
+                            <tr>
+                                <td>{{ fund.name }}</td>
+                                <td>{{ fund.category }}</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_1y) }}%</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_3y) }}%</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_5y) }}%</td>
+                                <td>{{ "%.2f"|format(fund.expense_ratio) }}%</td>
+                                <td>{{ fund.fund_house }}</td>
+                                <td>{{ fund.manager_name }} ({{ fund.manager_experience }}y)</td>
+                                <td>
+                                    <a href="{{ url_for('fund_details', fund_id=fund.id) }}" 
+                                       class="btn btn-sm btn-primary">View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>

@@ -99,19 +99,35 @@ def funds():
     # Get all funds
     funds = MutualFund.query.all()
 
-    # Mock recommended funds (in production, this would be based on user preferences and fund performance)
+    # Mock recommended funds with detailed information
     recommended_funds = []
-    for fund in funds[:3]:  # Taking first 3 funds as recommended
+    fund_managers = [
+        {"name": "John Smith", "experience": 15, "fund_house": "Alpha Investments"},
+        {"name": "Sarah Johnson", "experience": 12, "fund_house": "Beta Capital"},
+        {"name": "Michael Chen", "experience": 18, "fund_house": "Gamma Asset Management"},
+        {"name": "Lisa Brown", "experience": 10, "fund_house": "Delta Funds"}
+    ]
+
+    for i, fund in enumerate(funds[:10]):  # Taking top 10 funds as recommended
         fund.returns_1y = random.uniform(12, 18)
         fund.returns_3y = random.uniform(35, 50)
         fund.returns_5y = random.uniform(75, 95)
+        fund.expense_ratio = random.uniform(0.5, 1.5)
+        fund.fund_house = fund_managers[i % len(fund_managers)]["fund_house"]
+        fund.manager_name = fund_managers[i % len(fund_managers)]["name"]
+        fund.manager_experience = fund_managers[i % len(fund_managers)]["experience"]
         recommended_funds.append(fund)
 
     # Add mock returns to all funds
     for fund in funds:
-        fund.returns_1y = random.uniform(8, 20)
-        fund.returns_3y = random.uniform(30, 55)
-        fund.returns_5y = random.uniform(70, 100)
+        if fund not in recommended_funds:
+            fund.returns_1y = random.uniform(8, 20)
+            fund.returns_3y = random.uniform(30, 55)
+            fund.returns_5y = random.uniform(70, 100)
+            fund.expense_ratio = random.uniform(0.5, 2.0)
+            fund.fund_house = random.choice([m["fund_house"] for m in fund_managers])
+            fund.manager_name = random.choice([m["name"] for m in fund_managers])
+            fund.manager_experience = random.randint(8, 20)
 
     return render_template('funds.html', funds=funds, recommended_funds=recommended_funds)
 
