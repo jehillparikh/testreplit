@@ -47,6 +47,9 @@
                             <a class="nav-link" data-bs-toggle="tab" href="#details">Fund Details</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#sector">Sector Allocation</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#sip">SIP Calculator</a>
                         </li>
                     </ul>
@@ -106,6 +109,30 @@
                                             <span>{{ fund.exit_load }}</span>
                                         </li>
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Sector Allocation Tab -->
+                        <div class="tab-pane fade" id="sector">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <canvas id="sectorChart" height="300"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sector</th>
+                                                    <th>Allocation (%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="sectorTable">
+                                                <!-- Populated by JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

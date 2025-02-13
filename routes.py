@@ -300,13 +300,40 @@ def verify_bank():
 
     return jsonify({'error': result}), 400
 
+@app.route('/api/chatbot', methods=['POST'])
+@login_required
+def chatbot():
+    data = request.get_json()
+    message = data.get('message', '').lower()
+
+    # Simple rule-based responses
+    responses = {
+        'how do i start investing': 'To start investing, first complete your KYC. Then explore our recommended funds section and start with a SIP in a fund that matches your risk profile.',
+        'what is sip': 'SIP (Systematic Investment Plan) allows you to invest a fixed amount regularly in mutual funds, helping you build wealth through disciplined investing.',
+        'how to choose funds': 'Consider factors like your investment goals, risk tolerance, fund performance history, expense ratio, and fund manager\'s track record.',
+    }
+
+    # Default response for unknown queries
+    response = responses.get(message, 'I suggest speaking with our financial advisors for personalized guidance. You can also explore our detailed fund information pages.')
+
+    return jsonify({'response': response})
+
 @app.route('/fund/<int:fund_id>')
 @login_required
 def fund_details(fund_id):
     fund = MutualFund.query.get_or_404(fund_id)
     portfolio = Portfolio.query.filter_by(user_id=current_user.id, fund_id=fund_id).first()
 
-    # Add mock fund manager data
+    # Add mock sector allocation data
+    fund.sector_allocation = {
+        'Financial Services': 35.2,
+        'Technology': 25.8,
+        'Consumer Goods': 15.5,
+        'Healthcare': 10.2,
+        'Automobile': 8.3,
+        'Others': 5.0
+    }
+
     fund.manager_name = "John Smith"
     fund.manager_experience = 15
     fund.manager_image = url_for('static', filename='images/default_manager.svg')

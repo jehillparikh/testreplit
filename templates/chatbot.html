@@ -1,0 +1,40 @@
+<div class="chatbot-widget" id="chatbotWidget">
+    <div class="chat-header">
+        <h5 class="mb-0">Investment Assistant</h5>
+        <button class="btn btn-link text-light" id="minimizeChatbot">
+            <i class="bi bi-dash-lg"></i>
+        </button>
+    </div>
+    <div class="chat-body" id="chatMessages">
+        <div class="welcome-message">
+            <p>Hello! I'm your investment assistant. How can I help you today?</p>
+            <div class="quick-actions">
+                <button class="btn btn-sm btn-outline-primary mb-2" onclick="askQuestion('How do I start investing?')">
+                    How to start investing?
+                </button>
+                <button class="btn btn-sm btn-outline-primary mb-2" onclick="askQuestion('What is SIP?')">
+                    What is SIP?
+                </button>
+                <button class="btn btn-sm btn-outline-primary mb-2" onclick="askQuestion('How to choose funds?')">
+                    How to choose funds?
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="chat-input">
+        <form id="chatForm" onsubmit="sendMessage(event)">
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type your question...">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="chatbot-trigger" id="chatbotTrigger">
+    <button class="btn btn-primary rounded-circle">
+        <i class="bi bi-chat-dots"></i>
+    </button>
+</div>
