@@ -10,6 +10,8 @@ import base64
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import random
+from openai import OpenAI
+import os
 
 payment_service = PaymentService()
 kyc_service = KYCService()
@@ -25,9 +27,12 @@ def init_mock_data():
             username='admin',
             email='admin@test.com'
         )
-        admin_user.set_password('dummy')
+        admin_user.set_password('admin123')  # Set a known password for testing
         db.session.add(admin_user)
         db.session.commit()
+        app.logger.info('Created test admin user')
+    else:
+        app.logger.info('Test admin user already exists')
 
     # Initialize mock funds if not exists
     if MutualFund.query.first() is None:
@@ -42,6 +47,7 @@ def init_mock_data():
             db.session.add(fund)
 
         db.session.commit()
+        app.logger.info('Initialized mock funds')
 
 @app.route('/')
 def index():
@@ -306,17 +312,46 @@ def chatbot():
     data = request.get_json()
     message = data.get('message', '').lower()
 
-    # Simple rule-based responses
-    responses = {
-        'how do i start investing': 'To start investing, first complete your KYC. Then explore our recommended funds section and start with a SIP in a fund that matches your risk profile.',
-        'what is sip': 'SIP (Systematic Investment Plan) allows you to invest a fixed amount regularly in mutual funds, helping you build wealth through disciplined investing.',
-        'how to choose funds': 'Consider factors like your investment goals, risk tolerance, fund performance history, expense ratio, and fund manager\'s track record.',
-    }
+    # Check if OpenAI API key is configured
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return jsonify({
+            'response': "I apologize, but I'm currently under maintenance. Please try again later when the service is fully configured."
+        }), 503
 
-    # Default response for unknown queries
-    response = responses.get(message, 'I suggest speaking with our financial advisors for personalized guidance. You can also explore our detailed fund information pages.')
+    try:
+        # Initialize OpenAI client only when needed
+        openai_client = OpenAI(api_key=api_key)
 
-    return jsonify({'response': response})
+        # Prepare system message for finance expertise
+        system_message = """You are a knowledgeable mutual fund investment advisor. 
+        Provide clear, accurate advice about mutual funds, investment strategies, 
+        and market insights. Use simple language and explain complex terms. 
+        Keep responses concise yet informative."""
+
+        # Create chat completion
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": message}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+
+        return jsonify({'response': response.choices[0].message.content})
+
+    except Exception as e:
+        app.logger.error(f"OpenAI API error: {str(e)}")
+        return jsonify({
+            'response': 'I apologize, but I encountered an error. Please try again or contact support if the issue persists.'
+        }), 500
+
+@app.route('/agent')
+@login_required
+def agent():
+    return render_template('agent.html')
 
 @app.route('/fund/<int:fund_id>')
 @login_required
