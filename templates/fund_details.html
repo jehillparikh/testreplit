@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Fund Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ fund.name }}</h2>
+            <p class="text-muted">{{ fund.category }} | {{ fund.risk_level }} Risk</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#buyModal">Buy</button>
+            <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#sellModal">Sell</button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sipModal">Start SIP</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content Area -->
+        <div class="col-md-8">
+            <!-- Performance Chart -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title">Fund Performance</h5>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="1M">1M</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="3M">3M</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="6M">6M</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary active" data-period="1Y">1Y</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="3Y">3Y</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="5Y">5Y</button>
+                        </div>
+                    </div>
+                    <canvas id="performanceChart" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#returns">Returns</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#details">Fund Details</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#sip">SIP Calculator</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3">
+                        <!-- Returns Tab -->
+                        <div class="tab-pane fade show active" id="returns">
+                            <h6 class="mb-3">CAGR Returns</h6>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Fund Returns</th>
+                                            <th>Category Average</th>
+                                            <th>Benchmark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="returnsTable">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Fund Details Tab -->
+                        <div class="tab-pane fade" id="details">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Fund Manager</h6>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="{{ fund.manager_image }}" alt="Fund Manager" class="rounded-circle me-3" width="64">
+                                        <div>
+                                            <h6 class="mb-1">{{ fund.manager_name }}</h6>
+                                            <p class="text-muted mb-0">Experience: {{ fund.manager_experience }} years</p>
+                                        </div>
+                                    </div>
+                                    <p>{{ fund.manager_bio }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Fund Information</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Launch Date</span>
+                                            <span>{{ fund.launch_date }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Fund Size</span>
+                                            <span>₹{{ fund.aum }} Cr.</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Expense Ratio</span>
+                                            <span>{{ fund.expense_ratio }}%</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Exit Load</span>
+                                            <span>{{ fund.exit_load }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SIP Calculator Tab -->
+                        <div class="tab-pane fade" id="sip">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <form id="sipCalculator">
+                                        <div class="mb-3">
+                                            <label class="form-label">Monthly Investment (₹)</label>
+                                            <input type="number" class="form-control" id="sipAmount" value="5000">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Investment Period (Years)</label>
+                                            <input type="number" class="form-control" id="sipPeriod" value="5">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Expected Return Rate (%)</label>
+                                            <input type="number" class="form-control" id="sipReturn" value="12">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="calculateSIP">Calculate</button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">SIP Results</h6>
+                                            <div id="sipResults">
+                                                <!-- Populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Your Portfolio</h5>
+                    <div id="portfolioDetails">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Units Held</span>
+                                    <span id="unitsHeld">{{ portfolio.units|default('0.000') }}</span>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Current Value</span>
+                                    <span id="currentValue">₹{{ "%.2f"|format(portfolio.current_value|default(0)) }}</span>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Invested Amount</span>
+                                    <span id="investedAmount">₹{{ "%.2f"|format(portfolio.invested_amount|default(0)) }}</span>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Returns</span>
+                                    <span id="returns" class="{{ 'text-success' if portfolio.returns|default(0) >= 0 else 'text-danger' }}">
+                                        {{ "%.2f"|format(portfolio.returns|default(0)) }}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buy Modal -->
+<div class="modal fade" id="buyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Buy Fund Units</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="buyForm">
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₹)</label>
+                        <input type="number" class="form-control" id="buyAmount" required min="{{ fund.min_investment }}">
+                        <small class="text-muted">Minimum investment: ₹{{ fund.min_investment }}</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmBuy">Proceed to Pay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sell Modal -->
+<div class="modal fade" id="sellModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sell Fund Units</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sellForm">
+                    <div class="mb-3">
+                        <label class="form-label">Units to Sell</label>
+                        <input type="number" class="form-control" id="sellUnits" required step="0.001">
+                        <small class="text-muted">Available units: <span id="availableUnits">{{ portfolio.units|default('0.000') }}</span></small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSell">Confirm Sale</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIP Modal -->
+<div class="modal fade" id="sipModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Start SIP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sipForm">
+                    <div class="mb-3">
+                        <label class="form-label">Monthly Investment (₹)</label>
+                        <input type="number" class="form-control" id="monthlySIP" required min="{{ fund.min_sip|default(1000) }}">
+                        <small class="text-muted">Minimum SIP: ₹{{ fund.min_sip|default(1000) }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SIP Date</label>
+                        <select class="form-select" id="sipDate">
+                            <option value="1">1st</option>
+                            <option value="5">5th</option>
+                            <option value="10">10th</option>
+                            <option value="15">15th</option>
+                            <option value="20">20th</option>
+                            <option value="25">25th</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSIP">Start SIP</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/fund_details.js') }}"></script>
+{% endblock %}

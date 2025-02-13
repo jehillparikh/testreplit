@@ -8,6 +8,8 @@ from services.kyc_service import KYCService
 import json
 import base64
 from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+import random
 
 payment_service = PaymentService()
 kyc_service = KYCService()
@@ -265,6 +267,131 @@ def verify_bank():
         return jsonify({'status': 'success', 'message': 'Bank account verified successfully'})
 
     return jsonify({'error': result}), 400
+
+@app.route('/fund/<int:fund_id>')
+@login_required
+def fund_details(fund_id):
+    fund = MutualFund.query.get_or_404(fund_id)
+    portfolio = Portfolio.query.filter_by(user_id=current_user.id, fund_id=fund_id).first()
+
+    # Add mock fund manager data
+    fund.manager_name = "John Smith"
+    fund.manager_experience = 15
+    fund.manager_image = url_for('static', filename='images/default_manager.svg')
+    fund.manager_bio = "Over 15 years of experience in fund management with expertise in equity markets."
+    fund.launch_date = "Jan 1, 2010"
+    fund.aum = "1,234.56"
+    fund.exit_load = "1% if redeemed within 1 year"
+
+    return render_template('fund_details.html', fund=fund, portfolio=portfolio)
+
+@app.route('/api/fund-performance/<int:fund_id>')
+@login_required
+def fund_performance(fund_id):
+    period = request.args.get('period', '1Y')
+
+    # Mock performance data
+    
+    dates = []
+    fund_nav = []
+    benchmark = []
+
+    periods = {
+        '1M': 30,
+        '3M': 90,
+        '6M': 180,
+        '1Y': 365,
+        '3Y': 1095,
+        '5Y': 1825
+    }
+
+    days = periods.get(period, 365)
+    base_nav = 100
+    base_benchmark = 100
+
+    for i in range(days):
+        date = datetime.now() - timedelta(days=days-i)
+        dates.append(date.strftime('%Y-%m-%d'))
+
+        # Generate slightly different random walks for fund and benchmark
+        base_nav *= (1 + random.uniform(-0.01, 0.012))
+        base_benchmark *= (1 + random.uniform(-0.009, 0.01))
+
+        fund_nav.append(round(base_nav, 2))
+        benchmark.append(round(base_benchmark, 2))
+
+    # Calculate returns for different periods
+    returns = {
+        '1M': {'fund': 2.5, 'category': 2.1, 'benchmark': 1.9},
+        '3M': {'fund': 7.8, 'category': 6.9, 'benchmark': 6.5},
+        '6M': {'fund': 15.2, 'category': 14.1, 'benchmark': 13.8},
+        '1Y': {'fund': 22.5, 'category': 20.8, 'benchmark': 19.5},
+        '3Y': {'fund': 45.6, 'category': 42.3, 'benchmark': 40.1},
+        '5Y': {'fund': 98.4, 'category': 92.1, 'benchmark': 88.7}
+    }
+
+    return jsonify({
+        'labels': dates,
+        'fund_nav': fund_nav,
+        'benchmark': benchmark,
+        'returns': returns
+    })
+
+@app.route('/api/sell-units', methods=['POST'])
+@login_required
+def sell_units():
+    data = request.get_json()
+    fund_id = data.get('fund_id')
+    units = float(data.get('units'))
+
+    portfolio = Portfolio.query.filter_by(
+        user_id=current_user.id,
+        fund_id=fund_id
+    ).first()
+
+    if not portfolio or portfolio.units < units:
+        return jsonify({'error': 'Insufficient units'}), 400
+
+    fund = MutualFund.query.get(fund_id)
+    amount = units * fund.nav
+
+    # Create sell transaction
+    transaction = Transaction(
+        user_id=current_user.id,
+        fund_id=fund_id,
+        transaction_type='SELL',
+        units=units,
+        nav=fund.nav,
+        amount=amount
+    )
+
+    # Update portfolio
+    portfolio.units -= units
+    if portfolio.units == 0:
+        db.session.delete(portfolio)
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({'status': 'success', 'amount': amount})
+
+@app.route('/api/create-sip', methods=['POST'])
+@login_required
+def create_sip():
+    data = request.get_json()
+    fund_id = data.get('fund_id')
+    amount = float(data.get('amount'))
+    sip_date = int(data.get('sip_date'))
+
+    fund = MutualFund.query.get_or_404(fund_id)
+
+    if amount < fund.min_investment:
+        return jsonify({'error': f'Minimum SIP amount is ₹{fund.min_investment}'}), 400
+
+    # Create SIP record (implement SIP model and logic)
+    # For now, return success
+    return jsonify({'status': 'success'})
+
 
 with app.app_context():
     init_mock_data()
