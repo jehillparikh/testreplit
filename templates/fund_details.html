@@ -15,11 +15,103 @@
         </div>
     </div>
 
-    <div class="row">
-        <!-- Main Content Area -->
-        <div class="col-md-8">
-            <!-- Performance Chart -->
-            <div class="card mb-4">
+    <!-- Main Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#overview">Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#performance">Performance</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#portfolio">Portfolio</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#fundDetails">Fund Details</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#sector">Sector Allocation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#calculator">SIP Calculator</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Fund Overview</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>NAV</span>
+                                            <span>₹{{ "%.2f"|format(fund.nav) }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>1Y Return</span>
+                                            <span class="text-success">{{ "%.2f"|format(fund.returns_1y|default(0)) }}%</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Min Investment</span>
+                                            <span>₹{{ "%.2f"|format(fund.min_investment) }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Risk Level</span>
+                                            <span>{{ fund.risk_level }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Fund Size</span>
+                                            <span>₹{{ fund.aum }} Cr.</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Expense Ratio</span>
+                                            <span>{{ "%.2f"|format(fund.expense_ratio) }}%</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Your Investment</h5>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Units Held</span>
+                                    <span id="unitsHeld">{{ portfolio.units|default('0.000') }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Current Value</span>
+                                    <span>₹{{ "%.2f"|format(portfolio.current_value|default(0)) }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Returns</span>
+                                    <span class="{{ 'text-success' if portfolio.returns|default(0) >= 0 else 'text-danger' }}">
+                                        {{ "%.2f"|format(portfolio.returns|default(0)) }}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Tab -->
+        <div class="tab-pane fade" id="performance">
+            <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">Fund Performance</h5>
@@ -35,141 +127,53 @@
                     <div style="height: 300px;">
                         <canvas id="performanceChart"></canvas>
                     </div>
+                    <div class="mt-4">
+                        <h6 class="mb-3">CAGR Returns</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>Fund Returns</th>
+                                        <th>Category Average</th>
+                                        <th>Benchmark</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="returnsTable">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Tabs -->
+        <!-- Portfolio Tab -->
+        <div class="tab-pane fade" id="portfolio">
             <div class="card">
                 <div class="card-body">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#returns">Returns</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#details">Fund Details</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#sector">Sector Allocation</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#sip">SIP Calculator</a>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content mt-3">
-                        <!-- Returns Tab -->
-                        <div class="tab-pane fade show active" id="returns">
-                            <h6 class="mb-3">CAGR Returns</h6>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Period</th>
-                                            <th>Fund Returns</th>
-                                            <th>Category Average</th>
-                                            <th>Benchmark</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="returnsTable">
-                                        <!-- Populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Fund Details Tab -->
-                        <div class="tab-pane fade" id="details">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="mb-3">Fund Manager</h6>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <img src="{{ fund.manager_image }}" alt="Fund Manager" class="rounded-circle me-3" width="64">
-                                        <div>
-                                            <h6 class="mb-1">{{ fund.manager_name }}</h6>
-                                            <p class="text-muted mb-0">Experience: {{ fund.manager_experience }} years</p>
-                                        </div>
-                                    </div>
-                                    <p>{{ fund.manager_bio }}</p>
+                    <h5 class="card-title">Portfolio Details</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Units Held</span>
+                                    <span>{{ portfolio.units|default('0.000') }}</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="mb-3">Fund Information</h6>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Launch Date</span>
-                                            <span>{{ fund.launch_date }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Fund Size</span>
-                                            <span>₹{{ fund.aum }} Cr.</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Expense Ratio</span>
-                                            <span>{{ fund.expense_ratio }}%</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Exit Load</span>
-                                            <span>{{ fund.exit_load }}</span>
-                                        </li>
-                                    </ul>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Current Value</span>
+                                    <span>₹{{ "%.2f"|format(portfolio.current_value|default(0)) }}</span>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Sector Allocation Tab -->
-                        <div class="tab-pane fade" id="sector">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div style="height: 300px;">
-                                        <canvas id="sectorChart" data-sectors='{{ fund.sector_allocation|tojson }}'></canvas>
-                                    </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Invested Amount</span>
+                                    <span>₹{{ "%.2f"|format(portfolio.invested_amount|default(0)) }}</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Sector</th>
-                                                    <th>Allocation (%)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="sectorTable">
-                                                <!-- Populated by JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- SIP Calculator Tab -->
-                        <div class="tab-pane fade" id="sip">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <form id="sipCalculator">
-                                        <div class="mb-3">
-                                            <label class="form-label">Monthly Investment (₹)</label>
-                                            <input type="number" class="form-control" id="sipAmount" value="5000">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Investment Period (Years)</label>
-                                            <input type="number" class="form-control" id="sipPeriod" value="5">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Expected Return Rate (%)</label>
-                                            <input type="number" class="form-control" id="sipReturn" value="12">
-                                        </div>
-                                        <button type="button" class="btn btn-primary" id="calculateSIP">Calculate</button>
-                                    </form>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h6 class="card-title">SIP Results</h6>
-                                            <div id="sipResults">
-                                                <!-- Populated by JavaScript -->
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <span>Returns</span>
+                                    <span class="{{ 'text-success' if portfolio.returns|default(0) >= 0 else 'text-danger' }}">
+                                        {{ "%.2f"|format(portfolio.returns|default(0)) }}%
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -178,37 +182,109 @@
             </div>
         </div>
 
-        <!-- Portfolio Sidebar -->
-        <div class="col-md-4">
+        <!-- Fund Details Tab -->
+        <div class="tab-pane fade" id="fundDetails">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Your Portfolio</h5>
-                    <div id="portfolioDetails">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Units Held</span>
-                                    <span id="unitsHeld">{{ portfolio.units|default('0.000') }}</span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Fund Manager</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ fund.manager_image }}" alt="Fund Manager" class="rounded-circle me-3" width="64">
+                                <div>
+                                    <h6 class="mb-1">{{ fund.manager_name }}</h6>
+                                    <p class="text-muted mb-0">Experience: {{ fund.manager_experience }} years</p>
                                 </div>
                             </div>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Current Value</span>
-                                    <span id="currentValue">₹{{ "%.2f"|format(portfolio.current_value|default(0)) }}</span>
-                                </div>
+                            <p>{{ fund.manager_bio }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Fund Information</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Launch Date</span>
+                                    <span>{{ fund.launch_date }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Fund Size</span>
+                                    <span>₹{{ fund.aum }} Cr.</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Expense Ratio</span>
+                                    <span>{{ fund.expense_ratio }}%</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Exit Load</span>
+                                    <span>{{ fund.exit_load }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sector Allocation Tab -->
+        <div class="tab-pane fade" id="sector">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sector Allocation</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div style="height: 300px;">
+                                <canvas id="sectorChart" data-sectors='{{ fund.sector_allocation|tojson }}'></canvas>
                             </div>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Invested Amount</span>
-                                    <span id="investedAmount">₹{{ "%.2f"|format(portfolio.invested_amount|default(0)) }}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sector</th>
+                                            <th>Allocation (%)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sectorTable">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Returns</span>
-                                    <span id="returns" class="{{ 'text-success' if portfolio.returns|default(0) >= 0 else 'text-danger' }}">
-                                        {{ "%.2f"|format(portfolio.returns|default(0)) }}%
-                                    </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIP Calculator Tab -->
+        <div class="tab-pane fade" id="calculator">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">SIP Calculator</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form id="sipCalculator">
+                                <div class="mb-3">
+                                    <label class="form-label">Monthly Investment (₹)</label>
+                                    <input type="number" class="form-control" id="sipAmount" value="5000">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Investment Period (Years)</label>
+                                    <input type="number" class="form-control" id="sipPeriod" value="5">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Expected Return Rate (%)</label>
+                                    <input type="number" class="form-control" id="sipReturn" value="12">
+                                </div>
+                                <button type="button" class="btn btn-primary" id="calculateSIP">Calculate</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">SIP Results</h6>
+                                    <div id="sipResults">
+                                        <!-- Populated by JavaScript -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
