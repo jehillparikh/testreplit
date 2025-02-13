@@ -12,56 +12,51 @@
 </head>
 <body>
     {% if current_user.is_authenticated %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
                 <i class="bi bi-graph-up-arrow text-primary me-2"></i>
                 <span class="fw-bold">MutualFund Pro</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2 {% if request.endpoint == 'dashboard' %}active{% endif %}" 
-                           href="{{ url_for('dashboard') }}">
-                           <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2 {% if request.endpoint == 'funds' %}active{% endif %}" 
-                           href="{{ url_for('funds') }}">
-                           <i class="bi bi-pie-chart me-1"></i> Explore Funds
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2 {% if request.endpoint == 'transactions' %}active{% endif %}" 
-                           href="{{ url_for('transactions') }}">
-                           <i class="bi bi-clock-history me-1"></i> Transactions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2" href="{{ url_for('kyc') }}">
-                            <i class="bi bi-person-badge me-1"></i> KYC
-                        </a>
-                    </li>
-                </ul>
-                <div class="d-flex align-items-center">
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i> {{ current_user.username }}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="bi bi-box-arrow-right me-1"></i> Logout
-                            </a></li>
-                        </ul>
-                    </div>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i> {{ current_user.username }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <div class="container">
+            <div class="nav nav-pills" role="tablist">
+                <a class="nav-link btn {% if request.endpoint == 'dashboard' %}active{% endif %}" 
+                   href="{{ url_for('dashboard') }}">
+                   <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                </a>
+                <a class="nav-link btn {% if request.endpoint == 'funds' %}active{% endif %}" 
+                   href="{{ url_for('funds') }}">
+                   <i class="bi bi-pie-chart me-1"></i> Explore Funds
+                </a>
+                <a class="nav-link btn {% if request.endpoint == 'transactions' %}active{% endif %}" 
+                   href="{{ url_for('transactions') }}">
+                   <i class="bi bi-clock-history me-1"></i> Transactions
+                </a>
+                <a class="nav-link btn {% if request.endpoint == 'kyc' %}active{% endif %}" 
+                   href="{{ url_for('kyc') }}">
+                   <i class="bi bi-person-badge me-1"></i> KYC
+                </a>
+            </div>
+        </div>
+    </div>
 
     <div class="content-wrapper">
         <div class="container mt-5 pt-4">
