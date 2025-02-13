@@ -96,8 +96,24 @@ def dashboard():
 @app.route('/funds')
 @login_required
 def funds():
+    # Get all funds
     funds = MutualFund.query.all()
-    return render_template('funds.html', funds=funds)
+
+    # Mock recommended funds (in production, this would be based on user preferences and fund performance)
+    recommended_funds = []
+    for fund in funds[:3]:  # Taking first 3 funds as recommended
+        fund.returns_1y = random.uniform(12, 18)
+        fund.returns_3y = random.uniform(35, 50)
+        fund.returns_5y = random.uniform(75, 95)
+        recommended_funds.append(fund)
+
+    # Add mock returns to all funds
+    for fund in funds:
+        fund.returns_1y = random.uniform(8, 20)
+        fund.returns_3y = random.uniform(30, 55)
+        fund.returns_5y = random.uniform(70, 100)
+
+    return render_template('funds.html', funds=funds, recommended_funds=recommended_funds)
 
 @app.route('/transactions')
 @login_required
@@ -291,7 +307,7 @@ def fund_performance(fund_id):
     period = request.args.get('period', '1Y')
 
     # Mock performance data
-    
+
     dates = []
     fund_nav = []
     benchmark = []

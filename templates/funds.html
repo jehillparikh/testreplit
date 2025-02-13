@@ -1,12 +1,72 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Header Section -->
 <div class="row mb-4">
     <div class="col-12">
         <h2>Mutual Funds</h2>
     </div>
 </div>
 
+<!-- Fund Categories -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4>Categories</h4>
+        <div class="row g-3">
+            {% for category in ['Index Funds', 'Large Cap', 'Mid Cap', 'Small Cap', 'Flexi Cap', 'Multi Asset', 'Balanced', 'Debt', 'Liquid'] %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category }}</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>1Y Return</span>
+                            <span class="text-success">15.8%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>3Y Return</span>
+                            <span class="text-success">45.2%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>5Y Return</span>
+                            <span class="text-success">82.6%</span>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Funds</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recommended Funds -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4>Recommended Funds</h4>
+        <div class="row g-3">
+            {% for fund in recommended_funds %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ fund.name }}</h5>
+                        <p class="card-text text-muted">{{ fund.category }}</p>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>1Y Return</span>
+                            <span class="text-success">{{ "%.1f"|format(fund.returns_1y) }}%</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Min Investment: ₹{{ "%.2f"|format(fund.min_investment) }}</small>
+                        </div>
+                        <a href="{{ url_for('fund_details', fund_id=fund.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Fund Search and Filters -->
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="input-group">
@@ -19,21 +79,28 @@
     <div class="col-md-4">
         <select class="form-select" id="categoryFilter">
             <option value="">All Categories</option>
-            <option value="Equity">Equity</option>
-            <option value="Hybrid">Hybrid</option>
+            <option value="Index">Index Funds</option>
+            <option value="Large Cap">Large Cap</option>
+            <option value="Mid Cap">Mid Cap</option>
+            <option value="Small Cap">Small Cap</option>
+            <option value="Flexi Cap">Flexi Cap</option>
+            <option value="Multi Asset">Multi Asset</option>
+            <option value="Balanced">Balanced</option>
             <option value="Debt">Debt</option>
+            <option value="Liquid">Liquid</option>
         </select>
     </div>
     <div class="col-md-4">
-        <select class="form-select" id="riskFilter">
-            <option value="">All Risk Levels</option>
-            <option value="Low">Low Risk</option>
-            <option value="Medium">Medium Risk</option>
-            <option value="High">High Risk</option>
+        <select class="form-select" id="sortBy">
+            <option value="returns">Sort by Returns</option>
+            <option value="rating">Sort by Rating</option>
+            <option value="nav">Sort by NAV</option>
+            <option value="aum">Sort by AUM</option>
         </select>
     </div>
 </div>
 
+<!-- All Funds Table -->
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -43,10 +110,11 @@
                         <thead>
                             <tr>
                                 <th>Fund Name</th>
-                                <th>Ticker</th>
                                 <th>Category</th>
+                                <th>1Y Return</th>
+                                <th>3Y Return</th>
+                                <th>5Y Return</th>
                                 <th>NAV</th>
-                                <th>Expense Ratio</th>
                                 <th>Risk Level</th>
                                 <th>Min Investment</th>
                                 <th>Action</th>
@@ -56,19 +124,16 @@
                             {% for fund in funds %}
                             <tr>
                                 <td>{{ fund.name }}</td>
-                                <td>{{ fund.ticker }}</td>
                                 <td>{{ fund.category }}</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_1y|default(0)) }}%</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_3y|default(0)) }}%</td>
+                                <td class="text-success">{{ "%.2f"|format(fund.returns_5y|default(0)) }}%</td>
                                 <td>₹{{ "%.2f"|format(fund.nav) }}</td>
-                                <td>{{ "%.2f"|format(fund.expense_ratio) }}%</td>
                                 <td>{{ fund.risk_level }}</td>
                                 <td>₹{{ "%.2f"|format(fund.min_investment) }}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary invest-btn" 
-                                            data-fund-id="{{ fund.id }}"
-                                            data-fund-name="{{ fund.name }}"
-                                            data-min-investment="{{ fund.min_investment }}">
-                                        Invest
-                                    </button>
+                                    <a href="{{ url_for('fund_details', fund_id=fund.id) }}" 
+                                       class="btn btn-sm btn-primary">View</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -79,54 +144,8 @@
         </div>
     </div>
 </div>
-
-<!-- Investment Modal -->
-<div class="modal fade" id="investModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Invest in <span id="fundName"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="investForm">
-                    <div class="mb-3">
-                        <label class="form-label">Amount (₹)</label>
-                        <input type="number" class="form-control" id="investAmount" required min="0" step="100">
-                        <small class="text-muted">Minimum investment: ₹<span id="minInvestment"></span></small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmInvest">Proceed to Pay</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Payment Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Investment Successful</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Your investment has been processed successfully!</p>
-                <p>You can view your investment in the dashboard and track its performance.</p>
-            </div>
-            <div class="modal-footer">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="{{ url_for('static', filename='js/funds.js') }}"></script>
 {% endblock %}
